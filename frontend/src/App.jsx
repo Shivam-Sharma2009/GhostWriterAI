@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Ghost, Sparkles, Copy, Download, RefreshCw, ShieldCheck,
   CircleAlert, BookOpen, WandSparkles
@@ -15,16 +15,6 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [health, setHealth] = useState('checking')
-
-  useEffect(() => {
-    fetch(`${API}/health`)
-      .then(async response => {
-        const data = await response.json()
-        setHealth(response.ok && data.status === 'ok' ? 'ready' : data.status)
-      })
-      .catch(() => setHealth('offline'))
-  }, [])
 
   async function generate(continueStory = false) {
     if (!prompt.trim()) {
@@ -80,14 +70,6 @@ export default function App() {
     setNotice('Story download started.')
   }
 
-  const statusText = {
-    checking: 'CONNECTING TO AI',
-    ready: 'GEMINI CONFIGURED',
-    model_missing: 'MODEL NOT FOUND',
-    ollama_unavailable: 'OLLAMA UNAVAILABLE',
-    offline: 'BACKEND OFFLINE',
-  }[health] || 'CHECK AI CONNECTION'
-
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -95,9 +77,6 @@ export default function App() {
           <span className="brand-mark"><Ghost size={22} /></span>
           <span>GHOSTWRITER<span className="accent">.AI</span></span>
         </a>
-        <div className={`status-pill ${health === 'ready' ? 'is-ready' : ''}`}>
-          <span className="status-dot" /> {statusText}
-        </div>
       </header>
 
       <section className="hero">
@@ -185,7 +164,6 @@ export default function App() {
       <footer>
         <span>GHOSTWRITER.AI</span>
         <span className="footer-center">MADE IN THE DARK <span>✳</span></span>
-        <span>GEMINI API · AI STORIES</span>
       </footer>
     </main>
   )
