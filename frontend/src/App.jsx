@@ -73,8 +73,8 @@ export default function App() {
   }
 
   const statusText = {
-    checking: 'CHECKING LOCAL MODEL',
-    ready: 'GEMMA ONLINE',
+    checking: 'CONNECTING TO AI',
+    ready: 'GEMINI ONLINE',
     model_missing: 'MODEL NOT FOUND',
     ollama_unavailable: 'OLLAMA UNAVAILABLE',
     offline: 'BACKEND OFFLINE',
@@ -96,7 +96,7 @@ export default function App() {
         <div className="eyebrow"><span /> YOUR IMAGINATION. YOUR NIGHTMARE.</div>
         <h1>Stories from the<br /><em>other side.</em></h1>
         <p className="subtitle">
-          One idea. A thousand dark possibilities. Let a local Gemma model
+          One idea. A thousand dark possibilities. Let Gemini
           bring your next nightmare to life.
         </p>
         <div className="hero-note"><ShieldCheck size={15} /> Generated securely through our hosted AI backend.</div>
