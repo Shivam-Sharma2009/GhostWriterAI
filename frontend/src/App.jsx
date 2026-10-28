@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Ghost, Sparkles, Copy, Download, RefreshCw, ShieldCheck,
   CircleAlert, BookOpen, WandSparkles
@@ -15,6 +15,22 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('ghostwriter-theme') === 'light' ? 'light' : 'dark'
+    } catch {
+      return 'dark'
+    }
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try {
+      localStorage.setItem('ghostwriter-theme', theme)
+    } catch {
+      // Theme still works for this session if storage is unavailable.
+    }
+  }, [theme])
 
   async function generate(continueStory = false) {
     if (!prompt.trim()) {
@@ -71,12 +87,24 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell theme-${theme}`}>
       <header className="topbar">
-        <a className="brand" href="#" aria-label="GhostWriter AI home">
+        <div className="topbar-left">
+          <button
+            className={`pumpkin-toggle ${theme === 'light' ? 'is-glowing' : ''}`}
+            type="button"
+            onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={theme === 'light'}
+            title={theme === 'light' ? 'Pumpkin glow: Light mode' : 'Pumpkin asleep: Dark mode'}
+          >
+            🎃
+          </button>
+          <a className="brand" href="#" aria-label="GhostWriter AI home">
           <span className="brand-mark"><Ghost size={22} /></span>
-          <span>GHOSTWRITER<span className="accent">.AI</span></span>
-        </a>
+            <span>GHOSTWRITER<span className="accent">.AI</span></span>
+          </a>
+        </div>
       </header>
 
       <section className="hero">
