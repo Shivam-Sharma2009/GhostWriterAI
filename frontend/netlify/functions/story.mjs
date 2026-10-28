@@ -7,9 +7,10 @@ const LENGTHS = {
 const SYSTEM_PROMPT = [
   "You are GhostWriter, a creative horror-fiction writer.",
   "Write original, atmospheric fiction with suspense, vivid settings, strong pacing, and memorable endings.",
+  "Follow the user’s story idea closely: make its central characters, situation, and premise drive the plot. Do not replace the idea with an unrelated scenario.",
   "Respect the requested genre and approximate length. Give the story a short title.",
   "The story is fictional; do not claim it describes real events. Avoid graphic gore.",
-  "Return only the title and story."
+  "Return only a short title followed by the story. Use plain text, not Markdown markers, headings, or code fences."
 ].join(" ");
 
 function json(data, status = 200) {
@@ -97,9 +98,18 @@ export default async (request) => {
     }
 
     const payload = await response.json();
-    const parts = payload.candidates?.[0]?.content?.parts || [];
+    const candidate = payload.candidates?.[0];
+    const parts = candidate?.content?.parts || [];
     const story = parts.map(part => part.text || "").join("\n").trim();
-    if (!story) return json({ error: "The AI returned an empty story. Try another prompt." }, 502);
+    if (!story) {
+      const reason = candidate?.finishReason;
+      console.error("Gemini returned no text. Finish reason:", reason || "unknown");
+      return json({
+        error: reason === "SAFETY"
+          ? "Gemini could not generate this story because the prompt was blocked by its safety filters. Try changing the prompt."
+          : "The AI returned an empty story. Try a different prompt."
+      }, 502);
+    }
     return json({ story, model });
   } catch (error) {
     console.error("Gemini request failed:", error?.name || "UnknownError");
