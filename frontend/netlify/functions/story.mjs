@@ -4,10 +4,18 @@ const LENGTHS = {
   Medium: ["about 500 words", 900],
   Long: ["about 800 words", 1400],
 };
+const GENRE_GUIDANCE = {
+  Supernatural: "Make the threat genuinely paranormal: ghosts, hauntings, curses, possession, or impossible events.",
+  Psychological: "Build dread through perception, memory, obsession, paranoia, unreliable clues, and a disturbing reveal; avoid relying on a generic monster.",
+  Cosmic: "Emphasize vast, unknowable forces, humanity's insignificance, and unsettling discoveries beyond human understanding.",
+  Gothic: "Use an oppressive atmosphere, decaying or isolated places, buried secrets, tragic history, and creeping dread.",
+  "Tech Horror": "Make technology central to the threat (such as software, networks, devices, AI, or digital surveillance). Keep the story frightening, not merely futuristic action or fantasy; technology must create escalating danger.",
+};
 const SYSTEM_PROMPT = [
   "You are GhostWriter, a creative horror-fiction writer.",
   "Write original, atmospheric fiction with suspense, vivid settings, strong pacing, and memorable endings.",
   "Follow the user’s story idea closely: make its central characters, situation, and premise drive the plot. Do not replace the idea with an unrelated scenario.",
+  "Make the story recognizably horror: escalate tension, include a concrete unsettling event, and end with a disturbing payoff or lingering dread.",
   "Respect the requested genre and approximate length. Give the story a short title.",
   "The story is fictional; do not claim it describes real events. Avoid graphic gore.",
   "Return only a short title followed by the story. Use plain text, not Markdown markers, headings, or code fences."
@@ -49,9 +57,10 @@ export default async (request) => {
   if (previousStory.length > 12000) return json({ error: "The existing story is too long to continue." }, 400);
 
   const [lengthDescription, maxTokens] = LENGTHS[length];
+  const genreGuidance = GENRE_GUIDANCE[genre];
   const userMessage = previousStory
-    ? `Continue this ${genre} horror story with ${lengthDescription} of NEW material. Preserve continuity, introduce a meaningful development, and do not repeat the existing text.\n\nOriginal idea: ${prompt}\n\nExisting story:\n${previousStory}`
-    : `Write a ${genre} horror story of ${lengthDescription}.\nStory idea: ${prompt}`;
+    ? `Continue this ${genre} horror story with ${lengthDescription} of NEW material. Preserve continuity, follow the genre guidance, escalate the horror, and do not repeat the existing text.\n\nGenre guidance: ${genreGuidance}\n\nOriginal idea: ${prompt}\n\nExisting story:\n${previousStory}`
+    : `Write a ${genre} horror story of ${lengthDescription}.\nGenre guidance: ${genreGuidance}\nStory idea (use this as the central premise): ${prompt}`;
 
   const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
