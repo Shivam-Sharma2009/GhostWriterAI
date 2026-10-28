@@ -226,3 +226,34 @@ footer { display: flex; justify-content: space-between; gap: 12px; color: #98a99
 :root[data-theme="light"] .footer-center span { color: #23854a; }
 :root[data-theme="light"] .pumpkin-toggle { background: rgba(255,255,255,.8); }
 :root[data-theme="light"] .pumpkin-toggle.is-glowing { background: rgba(255, 192, 112, .42); }
+
+/* Circular crop of the supplied Halloween pumpkin reference image. */
+.pumpkin-toggle {
+  width: 44px;
+  height: 44px;
+  flex-basis: 44px;
+  border-radius: 50%;
+  padding: 3px;
+  overflow: visible;
+}
+.pumpkin-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-image: url("data:image/jpeg;base64,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");
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 164, 61, .45);
+  filter: brightness(.43) saturate(.75);
+  transition: filter .25s ease, box-shadow .25s ease;
+}
+.pumpkin-toggle.is-glowing .pumpkin-image {
+  filter: brightness(1.08) saturate(1.18);
+  box-shadow: 0 0 9px rgba(255, 142, 30, .95), 0 0 22px rgba(255, 112, 17, .75), 0 0 40px rgba(255, 83, 8, .35);
+  border-color: rgba(255, 185, 88, .95);
+}
+.pumpkin-toggle.is-glowing { animation: pumpkin-flicker 3.2s ease-in-out infinite; }
+@media (max-width: 420px) {
+  .pumpkin-toggle { width: 38px; height: 38px; flex-basis: 38px; }
+}
