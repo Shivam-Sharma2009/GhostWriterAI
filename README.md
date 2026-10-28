@@ -31,7 +31,7 @@ The root `netlify.toml` configures:
 1. Open your Netlify project dashboard.
 2. Go to **Project configuration → Environment variables**.
 3. Add `GEMINI_API_KEY` and paste the secret key from [Google AI Studio](https://aistudio.google.com/apikey).
-4. Optionally add `GEMINI_MODEL` with value `gemini-2.5-flash`.
+4. Optionally add `GEMINI_MODEL` to override the default `gemini-3.5-flash-lite` model. Use a model available to your Google AI Studio API key.
 5. Ensure the key is available to Functions at runtime. Do not add it to `netlify.toml`, frontend source, or any `VITE_*` variable.
 6. Trigger a new deploy after setting the variable.
 
@@ -44,7 +44,7 @@ Pushes to `main` trigger Netlify builds if Git integration is enabled. A success
 - Health endpoint: `https://YOUR-SITE.netlify.app/.netlify/functions/health`
 - Story endpoint: `POST https://YOUR-SITE.netlify.app/.netlify/functions/story`
 
-The health endpoint returns `status: "ok"` when the backend has a configured key. Then test generation from the website itself.
+The health endpoint returns `status: "ok"` when the key is configured; it does not verify model access or quota. Then test generation from the website itself.
 
 ## Local development
 
