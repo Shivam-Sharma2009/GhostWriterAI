@@ -43,8 +43,16 @@ export default function App() {
           previous_story: continueStory ? story : '',
         }),
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Story generation failed.')
+      let data
+      try {
+        data = await response.json()
+      } catch {
+        throw new Error('The server returned an unreadable response. Please try again.')
+      }
+      if (!response.ok) throw new Error(data.error || `Story generation failed (HTTP ${response.status}).`)
+      if (typeof data.story !== 'string' || !data.story.trim()) {
+        throw new Error('The AI returned an empty story. Please try again.')
+      }
       setStory(continueStory && story ? `${story}\n\n${data.story}` : data.story)
     } catch (err) {
       setError(err.message || 'Could not reach the AI service. Please try again.')
@@ -68,13 +76,13 @@ export default function App() {
     link.href = blobUrl
     link.download = 'ghostwriter-story.txt'
     link.click()
-    URL.revokeObjectURL(blobUrl)
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
     setNotice('Story download started.')
   }
 
   const statusText = {
     checking: 'CONNECTING TO AI',
-    ready: 'GEMINI ONLINE',
+    ready: 'GEMINI CONFIGURED',
     model_missing: 'MODEL NOT FOUND',
     ollama_unavailable: 'OLLAMA UNAVAILABLE',
     offline: 'BACKEND OFFLINE',
@@ -119,7 +127,7 @@ export default function App() {
             </div>
           ) : story ? (
             <div className="story-output">
-              <article className="story-text">{story}</article>
+              <article className="story-text" aria-live="polite">{story}</article>
               <button className="continue-button" onClick={() => generate(true)} disabled={loading}>
                 {loading ? <RefreshCw size={15} className="spin" /> : <Sparkles size={15} />}
                 {loading ? 'CONTINUING…' : 'CONTINUE THE STORY'}
