@@ -45,7 +45,7 @@ export default function App() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Story generation failed.')
-      setStory(continueStory && story ? `${story}\n\n${data.story}` : data.story)
+      setStory(continueStory && story ? `${story}\\n\\n${data.story}` : data.story)
     } catch (err) {
       setError(err.message || 'Could not reach the local AI. Check both servers.')
     } finally {
@@ -103,6 +103,39 @@ export default function App() {
       </section>
 
       <section className="workspace">
+        <div className="panel manuscript">
+          <div className="manuscript-header">
+            <div className="section-title"><BookOpen size={16} /><span>THE MANUSCRIPT</span></div>
+            {story && <div className="story-actions">
+              <button title="Copy story" aria-label="Copy story" onClick={copyStory}><Copy size={16} /></button>
+              <button title="Download story" aria-label="Download story" onClick={downloadStory}><Download size={16} /></button>
+            </div>}
+          </div>
+          {loading && !story ? (
+            <div className="empty-state">
+              <div className="loading-orb"><Ghost size={32} /></div>
+              <h2>Something is stirring.</h2>
+              <p>Gemma is writing your story. This can take a little while on a laptop.</p>
+            </div>
+          ) : story ? (
+            <div className="story-output">
+              <article className="story-text">{story}</article>
+              <button className="continue-button" onClick={() => generate(true)} disabled={loading}>
+                {loading ? <RefreshCw size={15} className="spin" /> : <Sparkles size={15} />}
+                {loading ? 'CONTINUING…' : 'CONTINUE THE STORY'}
+              </button>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="ghost-art"><Ghost size={46} strokeWidth={1.1} /></div>
+              <h2>The page is waiting.</h2>
+              <p>Every nightmare begins with a single thought.</p>
+              <span className="empty-rule" />
+              <span className="empty-caption">YOUR STORY WILL APPEAR HERE</span>
+            </div>
+          )}
+        </div>
+
         <div className="panel controls">
           <div className="section-title"><WandSparkles size={16} /><span>CREATE YOUR NIGHTMARE</span></div>
           <label htmlFor="prompt">STORY SEED <span className="optional">({prompt.length}/1000)</span></label>
@@ -138,39 +171,6 @@ export default function App() {
           </div>
           {error && <p className="feedback error" role="alert">{error}</p>}
           {notice && <p className="feedback success" role="status">{notice}</p>}
-        </div>
-
-        <div className="panel manuscript">
-          <div className="manuscript-header">
-            <div className="section-title"><BookOpen size={16} /><span>THE MANUSCRIPT</span></div>
-            {story && <div className="story-actions">
-              <button title="Copy story" aria-label="Copy story" onClick={copyStory}><Copy size={16} /></button>
-              <button title="Download story" aria-label="Download story" onClick={downloadStory}><Download size={16} /></button>
-            </div>}
-          </div>
-          {loading && !story ? (
-            <div className="empty-state">
-              <div className="loading-orb"><Ghost size={32} /></div>
-              <h2>Something is stirring.</h2>
-              <p>Gemma is writing your story. This can take a little while on a laptop.</p>
-            </div>
-          ) : story ? (
-            <div className="story-output">
-              <article className="story-text">{story}</article>
-              <button className="continue-button" onClick={() => generate(true)} disabled={loading}>
-                {loading ? <RefreshCw size={15} className="spin" /> : <Sparkles size={15} />}
-                {loading ? 'CONTINUING…' : 'CONTINUE THE STORY'}
-              </button>
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="ghost-art"><Ghost size={46} strokeWidth={1.1} /></div>
-              <h2>The page is waiting.</h2>
-              <p>Every nightmare begins with a single thought.</p>
-              <span className="empty-rule" />
-              <span className="empty-caption">YOUR STORY WILL APPEAR HERE</span>
-            </div>
-          )}
         </div>
       </section>
 
