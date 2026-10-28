@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Ghost, Sparkles, Copy, Download, RefreshCw, ShieldCheck,
-  CircleAlert, CheckCircle2, BookOpen, WandSparkles
+  CircleAlert, BookOpen, WandSparkles
 } from 'lucide-react'
 import './App.css'
 
@@ -45,7 +45,7 @@ export default function App() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Story generation failed.')
-      setStory(continueStory && story ? `${story}\\n\\n${data.story}` : data.story)
+      setStory(continueStory && story ? `${story}\n\n${data.story}` : data.story)
     } catch (err) {
       setError(err.message || 'Could not reach the local AI. Check both servers.')
     } finally {
