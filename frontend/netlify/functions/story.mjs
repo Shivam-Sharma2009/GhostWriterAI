@@ -52,7 +52,7 @@ export default async (request) => {
     ? `Continue this ${genre} horror story with ${lengthDescription} of NEW material. Preserve continuity, introduce a meaningful development, and do not repeat the existing text.\n\nOriginal idea: ${prompt}\n\nExisting story:\n${previousStory}`
     : `Write a ${genre} horror story of ${lengthDescription}.\nStory idea: ${prompt}`;
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
   try {
@@ -71,15 +71,29 @@ export default async (request) => {
     });
 
     if (response.status === 429) {
-      return json({ error: "The AI service is busy or its quota was reached. Please try again later." }, 429);
+      console.error("Gemini API quota/rate limit reached (429).");
+      return json({ error: "Gemini's quota or rate limit was reached. Check Google AI Studio API usage and try again later." }, 429);
     }
     if (response.status === 401 || response.status === 403) {
-      console.error("Gemini rejected the configured API key.");
-      return json({ error: "The AI service key is invalid or lacks access. Please contact the site owner." }, 502);
+      console.error("Gemini rejected the configured API key or project permissions (HTTP", response.status, ").");
+      return json({ error: "Gemini rejected this API key or project permissions. Check the key in Google AI Studio and ensure the Gemini API is enabled." }, 502);
+    }
+    if (response.status === 404) {
+      console.error("Gemini model was not found or is unavailable:", model);
+      return json({ error: `The configured Gemini model (${model}) is unavailable for this API key. In Netlify, set GEMINI_MODEL to gemini-3.5-flash-lite and redeploy.` }, 502);
     }
     if (!response.ok) {
-      console.error("Gemini API returned HTTP", response.status);
-      return json({ error: "The AI service could not complete this request. Please try again." }, 502);
+      let providerMessage = "";
+      try {
+        const errorPayload = await response.json();
+        providerMessage = String(errorPayload?.error?.message || "");
+      } catch {}
+      console.error("Gemini API returned HTTP", response.status, providerMessage.slice(0, 300));
+      return json({
+        error: providerMessage
+          ? `Gemini API error (HTTP ${response.status}): ${providerMessage.slice(0, 220)}`
+          : `Gemini API returned HTTP ${response.status}. Check the Netlify function logs and Google AI Studio quota.`
+      }, 502);
     }
 
     const payload = await response.json();
