@@ -98,7 +98,7 @@ export default function App() {
             aria-pressed={theme === 'light'}
             title={theme === 'light' ? 'Pumpkin glow: Light mode' : 'Pumpkin asleep: Dark mode'}
           >
-            🎃
+            <span className="pumpkin-image" aria-hidden="true" />
           </button>
           <a className="brand" href="#" aria-label="GhostWriter AI home">
           <span className="brand-mark"><Ghost size={22} /></span>
