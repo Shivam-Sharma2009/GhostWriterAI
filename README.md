@@ -1,6 +1,6 @@
 # GhostWriter AI
 
-**Stories from the other side.** GhostWriter AI is a horror-fiction generator built with React, Flask, and the Gemini Developer API.
+**Stories from the other side.** GhostWriter AI is a horror-fiction generator built with React, Vite, Netlify Functions, and the Gemini Developer API.
 
 ## Features
 
@@ -10,88 +10,66 @@
 - Continue a story with a follow-up generation.
 - Copy or download generated stories.
 - Responsive dark interface with API status.
-- API key stays on the backend; it is never bundled into the frontend.
+- The Gemini API key stays in Netlify's server-side environment and is never shipped to the browser.
 
 ## Architecture
 
-`React + Vite (Netlify)` → `Flask API (Render)` → `Gemini Developer API`
+`React + Vite (Netlify static site)` → `Netlify Functions` → `Gemini Developer API`
 
-Prompts are sent from the backend to Google Gemini to generate a story. Do not enter sensitive or private information into prompts. Review Google's current Gemini API terms and data-use rules before using this for sensitive or commercial workloads.
+The production frontend and backend functions deploy together on Netlify. The Python/Flask backend under `backend/` is legacy local-development code; the Netlify functions under `frontend/netlify/functions/` are used by the deployed website.
 
-## Deploy the frontend on Netlify
+## Deploy both frontend and backend on Netlify
 
-The repository includes `netlify.toml` with the Vite base and publish settings.
+The root `netlify.toml` configures:
+- Base directory: `frontend`
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Functions directory: `netlify/functions` (relative to the base directory)
 
-In Netlify, open **Project configuration → Environment variables** and add:
+### 1. Set the Gemini API key securely
 
-- Key: `VITE_API_BASE_URL`
-- Value: the public Render backend URL, for example `https://your-service-name.onrender.com` (no trailing slash)
+1. Open your Netlify project dashboard.
+2. Go to **Project configuration → Environment variables**.
+3. Add `GEMINI_API_KEY` and paste the secret key from [Google AI Studio](https://aistudio.google.com/apikey).
+4. Optionally add `GEMINI_MODEL` with value `gemini-2.5-flash`.
+5. Ensure the key is available to Functions at runtime. Do not add it to `netlify.toml`, frontend source, or any `VITE_*` variable.
+6. Trigger a new deploy after setting the variable.
 
-Trigger a new frontend deploy after setting the variable.
+### 2. Deploy
 
-## Deploy the backend on Render (free tier for demos)
+Pushes to `main` trigger Netlify builds if Git integration is enabled. A successful deploy should publish the static site and the serverless functions together.
 
-The repository includes `render.yaml` to configure a Python web service from the `backend` directory.
+### 3. Verify
 
-1. Sign in to [Render](https://render.com/) and choose **New → Blueprint**.
-2. Connect this GitHub repository and approve access if asked.
-3. Review the service created from `render.yaml`.
-4. In the service's **Environment** settings, add `GEMINI_API_KEY` with your secret key from [Google AI Studio](https://aistudio.google.com/apikey). Never commit the key to GitHub or put it in a `VITE_*` variable.
-5. Set `FRONTEND_ORIGIN` to `https://ghostwriterai-hectoberfect.netlify.app`.
-6. Save and deploy. Copy the service's public `onrender.com` URL.
-7. Add that URL to Netlify as `VITE_API_BASE_URL` and redeploy the frontend.
+- Health endpoint: `https://YOUR-SITE.netlify.app/.netlify/functions/health`
+- Story endpoint: `POST https://YOUR-SITE.netlify.app/.netlify/functions/story`
 
-Render free services can spin down after inactivity, so the first request after a quiet period may take around a minute. Free plans and Gemini API quotas can change; check the current provider dashboards before a demo.
+The health endpoint returns `status: "ok"` when the backend has a configured key. Then test generation from the website itself.
 
 ## Local development
 
-Requirements: Python 3.10+, Node.js 20+ recommended, and a Gemini API key.
+Requirements: Node.js 20+ recommended, and a Gemini API key.
 
-### Backend (PowerShell)
-
-From the repository root:
-
-```powershell
-cd backend
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-$env:GEMINI_API_KEY = "paste-your-key-here"
-$env:FRONTEND_ORIGIN = "http://127.0.0.1:5173"
-.\.venv\Scripts\python.exe app.py
-```
-
-Keep the key only in your local shell or a private environment file that is excluded from Git.
-
-### Frontend
-
-Open a second terminal from the repository root:
+From the repository root, in PowerShell:
 
 ```powershell
 cd frontend
 npm install
-$env:VITE_API_BASE_URL = "http://127.0.0.1:5000"
-npm run dev
+$env:GEMINI_API_KEY = "paste-your-key-here"
+npx netlify dev
 ```
 
-Open `http://127.0.0.1:5173`.
-
-## API endpoints
-
-- `GET /api/health` — confirms the backend has a configured API key.
-- `POST /api/story` — accepts `prompt`, `genre`, `length`, and optional `previous_story`.
-
-The API validates inputs and applies a small in-memory per-IP request limit for demo protection. This is not a substitute for a persistent rate limiter or abuse protection for a larger public launch.
+Open the local URL shown by Netlify CLI. Keep the key only in your local shell or a private environment file excluded from Git. For a plain Vite-only preview, the Netlify Functions will not run.
 
 ## Security and limitations
 
-- Keep `GEMINI_API_KEY` only in Render's backend environment variables or a local secret environment.
+- Store `GEMINI_API_KEY` only in Netlify environment variables for server-side Functions.
 - Never expose the Gemini key in frontend JavaScript, GitHub, screenshots, or logs.
 - Restrict and monitor the key in Google AI Studio where available.
-- The free Gemini API tier has model-specific quotas and terms; a free tier is not a guarantee of unlimited or commercial usage.
-- Render free web services may sleep when idle and have resource limits.
-- CORS restricts browser origins but does not prevent direct API calls; the in-memory request limiter is basic demo protection.
-- Do not submit sensitive personal data to prompts.
+- The Gemini API free tier has model-specific quotas and terms; free usage is limited and not guaranteed to be unlimited or suitable for all commercial workloads.
+- Public serverless endpoints can be abused. This demo validates inputs but does not yet include a robust persistent rate limiter; monitor API usage and add stronger abuse controls before wide public sharing.
+- Do not submit sensitive personal data to story prompts. Review Google's current Gemini API data-use terms.
 
 ## License
 
-This project source is released under the MIT License. The Gemini API and models are governed by Google's applicable terms.
+This project source is released under the MIT License. Gemini models and API access are governed by Google's applicable terms.
