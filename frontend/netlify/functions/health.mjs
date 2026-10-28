@@ -3,7 +3,8 @@ export default async () => {
   return new Response(JSON.stringify({
     status: configured ? "ok" : "api_key_missing",
     provider: "Gemini",
-    model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite"
+    model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
+    note: "This confirms the key is configured; it does not test Gemini API availability or quota."
   }), {
     status: configured ? 200 : 503,
     headers: { "Content-Type": "application/json; charset=utf-8" }
