@@ -5,7 +5,8 @@ import {
 } from 'lucide-react'
 import './App.css'
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000').replace(/\\/+$/, '')\nconst API = `${API_BASE}/api`
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000').replace(/\/+$/, '')
+const API = `${API_BASE}/api`
 
 export default function App() {
   const [prompt, setPrompt] = useState('')
