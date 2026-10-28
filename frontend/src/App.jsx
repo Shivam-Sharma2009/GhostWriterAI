@@ -5,8 +5,7 @@ import {
 } from 'lucide-react'
 import './App.css'
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000').replace(/\/+$/, '')
-const API = `${API_BASE}/api`
+const API = import.meta.env.DEV ? 'http://127.0.0.1:5000/api' : '/.netlify/functions'
 
 export default function App() {
   const [prompt, setPrompt] = useState('')
@@ -100,7 +99,7 @@ export default function App() {
           One idea. A thousand dark possibilities. Let a local Gemma model
           bring your next nightmare to life.
         </p>
-        <div className="hero-note"><ShieldCheck size={15} /> Stories generated with the Gemini API.</div>
+        <div className="hero-note"><ShieldCheck size={15} /> Generated securely through our hosted AI backend.</div>
       </section>
 
       <section className="workspace">
@@ -168,7 +167,7 @@ export default function App() {
             {loading ? 'WRITING YOUR NIGHTMARE…' : 'GENERATE STORY'}
           </button>
           <div className="engine-note"><span className="engine-icon"><CircleAlert size={14} /></span>
-            Powered by Gemini API. Free-tier limits may apply.
+            Powered by hosted AI. Provider limits may apply.
           </div>
           {error && <p className="feedback error" role="alert">{error}</p>}
           {notice && <p className="feedback success" role="status">{notice}</p>}
