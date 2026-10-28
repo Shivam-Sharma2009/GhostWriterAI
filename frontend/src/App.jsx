@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import './App.css'
 
-const API = 'http://127.0.0.1:5000/api'
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000').replace(/\\/+$/, '')\nconst API = `${API_BASE}/api`
 
 export default function App() {
   const [prompt, setPrompt] = useState('')
@@ -47,7 +47,7 @@ export default function App() {
       if (!response.ok) throw new Error(data.error || 'Story generation failed.')
       setStory(continueStory && story ? `${story}\n\n${data.story}` : data.story)
     } catch (err) {
-      setError(err.message || 'Could not reach the local AI. Check both servers.')
+      setError(err.message || 'Could not reach the AI service. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -78,7 +78,7 @@ export default function App() {
     model_missing: 'MODEL NOT FOUND',
     ollama_unavailable: 'OLLAMA UNAVAILABLE',
     offline: 'BACKEND OFFLINE',
-  }[health] || 'CHECK LOCAL SETUP'
+  }[health] || 'CHECK AI CONNECTION'
 
   return (
     <main className="app-shell">
@@ -99,7 +99,7 @@ export default function App() {
           One idea. A thousand dark possibilities. Let a local Gemma model
           bring your next nightmare to life.
         </p>
-        <div className="hero-note"><ShieldCheck size={15} /> Your prompts stay on this machine.</div>
+        <div className="hero-note"><ShieldCheck size={15} /> Stories generated with the Gemini API.</div>
       </section>
 
       <section className="workspace">
@@ -115,7 +115,7 @@ export default function App() {
             <div className="empty-state">
               <div className="loading-orb"><Ghost size={32} /></div>
               <h2>Something is stirring.</h2>
-              <p>Gemma is writing your story. This can take a little while on a laptop.</p>
+              <p>Gemini is writing your story. The first request may take a moment.</p>
             </div>
           ) : story ? (
             <div className="story-output">
@@ -167,7 +167,7 @@ export default function App() {
             {loading ? 'WRITING YOUR NIGHTMARE…' : 'GENERATE STORY'}
           </button>
           <div className="engine-note"><span className="engine-icon"><CircleAlert size={14} /></span>
-            Runs locally with Ollama + Gemma. First generation may take a little longer.
+            Powered by Gemini API. Free-tier limits may apply.
           </div>
           {error && <p className="feedback error" role="alert">{error}</p>}
           {notice && <p className="feedback success" role="status">{notice}</p>}
@@ -177,7 +177,7 @@ export default function App() {
       <footer>
         <span>GHOSTWRITER.AI</span>
         <span className="footer-center">MADE IN THE DARK <span>✳</span></span>
-        <span>LOCAL AI · OPEN WEIGHTS</span>
+        <span>GEMINI API · AI STORIES</span>
       </footer>
     </main>
   )
