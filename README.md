@@ -1,127 +1,315 @@
 # 👻 GhostWriter AI
 
 > **Stories from the other side.**  
-> Turn a story seed into an atmospheric horror tale with AI.
+> Turn one unsettling idea into an atmospheric horror story.
 
-**Live app:** https://ghostwriterai-hectoberfect.netlify.app/  
-**Source code:** https://github.com/Shivam-Sharma2009/GhostWriterAI
+<p align="center">
+  <a href="https://ghostwriterai-hectoberfect.netlify.app/">
+    <strong>🌐 Open the live app</strong>
+  </a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Shivam-Sharma2009/GhostWriterAI">
+    <strong>View source code</strong>
+  </a>
+</p>
 
-GhostWriter AI is a responsive horror-story generator built with React, Vite, Netlify Functions, and Google's Gemini Developer API. It features a haunted-library visual theme, floating particles, and a Halloween pumpkin control that switches between dark and light modes.
+GhostWriter AI is a browser-based horror-fiction generator. Give it a story seed, choose a horror style and length, and let Google's Gemini model turn the idea into an original narrative. You can continue a generated story, copy it, or download it as a text file.
+
+The interface pairs a haunted-library atmosphere with a responsive writing workspace, drifting particle effects, and a pumpkin-inspired theme switch.
 
 ---
 
-## ✨ Features
+## Contents
 
-- **Prompt-led story generation** — start with a premise, character, setting, or unsettling event.
-- **Five horror styles** — Supernatural, Psychological, Cosmic, Gothic, and Tech Horror.
-- **Three story lengths** — Short, Medium, and Long.
-- **Continue the story** — ask the AI to extend the current story while preserving continuity.
-- **Copy and download** — copy the manuscript or download it as a plain-text file.
-- **Halloween theme switch** — click the circular pumpkin in the upper-left:
-  - Pumpkin unlit = dark mode.
-  - Pumpkin glowing = light mode.
-- **Saved theme preference** — the selected theme persists in the browser.
-- **Responsive layout and natural page scrolling** — works across desktop and mobile screen sizes.
-- **Atmospheric visuals** — horror-themed background, translucent panels, and drifting particle effects, with reduced-motion support.
-- **Server-side AI requests** — the Gemini API key stays in Netlify environment variables and is not included in frontend JavaScript.
+- [Features](#features)
+- [Screens and experience](#screens-and-experience)
+- [How it works](#how-it-works)
+- [Technology stack](#technology-stack)
+- [Repository structure](#repository-structure)
+- [Run locally](#run-locally)
+- [Deploy to Netlify](#deploy-to-netlify)
+- [API reference](#api-reference)
+- [Verification checklist](#verification-checklist)
+- [Security and limitations](#security-and-limitations)
+- [Roadmap](#roadmap)
+- [License](#license)
 
-## 🧰 Tech stack
+## Features
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | React, Vite, JavaScript, CSS |
-| Icons | Lucide React |
-| Serverless backend | Netlify Functions (ES modules) |
-| AI provider | Google Gemini Developer API |
-| Hosting | Netlify (frontend and functions) |
-| Source control | GitHub |
+### AI storytelling
+- **Prompt-led generation:** start with a premise, character, location, message, or strange event.
+- **Five horror styles:** Supernatural, Psychological, Cosmic, Gothic, and Tech Horror.
+- **Three length presets:** Short, Medium, and Long.
+- **Continue the story:** request new material while carrying forward the existing story as context.
+- **Original narrative output:** the server prompt guides the model toward suspense, atmosphere, escalation, and a memorable unsettling ending.
 
-## 🏗️ Architecture
+### Writing tools
+- **Copy:** copy the generated manuscript to the clipboard.
+- **Download:** save the story as a `.txt` file.
+- **Prompt counter:** see the character count while writing a story seed.
+- **Feedback states:** clear loading, success, and error messages.
+
+### Interface
+- **Dark and light themes:** use the pumpkin control in the top-left corner. An unlit pumpkin indicates dark mode; a glowing pumpkin indicates light mode.
+- **Theme persistence:** the selected theme is saved in browser storage when available.
+- **Live footer clock:** displays the current India time (IST) and date, updating every second.
+- **Responsive layout:** adapts to desktop and mobile screens, with normal page scrolling.
+- **Atmospheric presentation:** haunted-library background, translucent panels, and subtle drifting particles.
+- **Reduced-motion support:** animations are reduced when the operating system requests less motion.
+
+## Screens and experience
+
+1. Open the app and enter a story seed in **Story Seed**.
+2. Select one of the five horror styles.
+3. Choose Short, Medium, or Long.
+4. Select **Generate Story** and read the manuscript.
+5. Use **Continue the Story** to request additional material.
+6. Copy or download the finished story.
+
+The app is a creative writing tool. Generated stories are fictional and should be reviewed and edited by the user.
+
+## How it works
+
+The production application uses a React/Vite frontend and Netlify Functions as a server-side bridge to the Gemini Developer API.
 
 ```text
-Browser
-  └── React + Vite static frontend
-        └── /.netlify/functions/story
-              └── Gemini Developer API
-
-        └── /.netlify/functions/health
-              └── Reports whether the API key is configured
+┌───────────────────────────────┐
+│          User browser         │
+│      React + Vite UI          │
+│  Prompt · Genre · Length      │
+└───────────────┬───────────────┘
+                │ POST JSON
+                ▼
+┌───────────────────────────────┐
+│       Netlify Functions       │
+│  Validate input and context   │
+│  Read server-side API key     │
+└───────────────┬───────────────┘
+                │ HTTPS request
+                ▼
+┌───────────────────────────────┐
+│      Gemini Developer API    │
+│       Text generation         │
+└───────────────┬───────────────┘
+                │ Generated story
+                ▼
+┌───────────────────────────────┐
+│       Manuscript panel        │
+│   Read · Continue · Copy      │
+│            Download           │
+└───────────────────────────────┘
 ```
 
-The production frontend and serverless backend deploy together on Netlify. The older `backend/` Flask/Ollama implementation remains in the repository as legacy/local-development code; the live Netlify app uses the functions in `frontend/netlify/functions/`.
+The browser sends the prompt, genre, length, and optional previous story to the `story` function. The function validates the request, constructs genre-specific instructions, calls Gemini, and returns the generated text as JSON.
 
-## 🚀 Deployment: Netlify
+The `health` function reports whether the server-side API key is configured. It is a configuration check, not a live model or quota test.
 
-The root `netlify.toml` configures the frontend build and serverless functions:
+> **Deployment note:** The active production path is `frontend/netlify/functions/`. The repository also contains an older Flask/Ollama backend under `backend/`; it is retained as legacy/local-development code and is not the backend used by the current Netlify deployment.
 
-- **Base directory:** `frontend`
-- **Build command:** `npm run build`
-- **Publish directory:** `dist`
-- **Functions directory:** `netlify/functions` (relative to the `frontend` base)
+## Technology stack
 
-### 1. Configure the Gemini API key
+| Area | Technology |
+|---|---|
+| UI | React 18 |
+| Build tooling | Vite 6 |
+| Language | JavaScript (ES modules) |
+| Styling | CSS |
+| Icons | Lucide React |
+| Serverless API | Netlify Functions |
+| AI provider | Google Gemini Developer API |
+| Default model | `gemini-3.5-flash-lite` (overridable with `GEMINI_MODEL`) |
+| Hosting | Netlify |
+| Version control | Git and GitHub |
 
-1. Open the [Google AI Studio API key page](https://aistudio.google.com/apikey) and create or select an API key.
-2. In Netlify, open **Project configuration → Environment variables**.
-3. Add `GEMINI_API_KEY` and mark it as a secret.
-4. Optionally add `GEMINI_MODEL` to override the model default configured in `frontend/netlify/functions/story.mjs`. Choose a model available to your API key.
-5. Ensure the variable is available to Functions at runtime, then redeploy.
+## Repository structure
 
-**Never** put the key in frontend source code, GitHub, `netlify.toml`, or a `VITE_*` variable.
+```text
+GhostWriterAI/
+├── frontend/
+│   ├── netlify/
+│   │   └── functions/
+│   │       ├── health.mjs       # Configuration health check
+│   │       └── story.mjs        # Validates prompts and calls Gemini
+│   ├── src/
+│   │   ├── App.jsx              # Main writing experience
+│   │   ├── App.css              # Themes, layout, and visual effects
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── backend/                     # Legacy Flask/Ollama implementation
+├── netlify.toml                 # Netlify build and function configuration
+├── run-backend.ps1              # Legacy backend helper
+├── run-frontend.ps1             # Legacy frontend helper
+├── LICENSE
+└── README.md
+```
 
-### 2. Deploy
+## Run locally
 
-Connect the GitHub repository to Netlify and use the build settings above. With Git integration enabled, pushes to `main` trigger a deployment automatically.
+### Prerequisites
 
-### 3. Verify the deployment
+- Node.js (LTS recommended) and npm
+- A Google Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+- Netlify CLI to run the frontend and serverless functions together
 
-Replace the example hostname below with your Netlify site hostname.
+### 1. Clone the repository
 
-- **Health check:** `https://YOUR-SITE.netlify.app/.netlify/functions/health`
-- **Story function:** `POST https://YOUR-SITE.netlify.app/.netlify/functions/story`
-- **End-to-end check:** open the live website, enter a story seed, select a genre and length, and click **Generate Story**.
+```bash
+git clone https://github.com/Shivam-Sharma2009/GhostWriterAI.git
+cd GhostWriterAI
+```
 
-The health endpoint checks whether the API key is configured. It does **not** prove that Gemini model access, quota, or story generation is working; test generation in the app as well.
+### 2. Install frontend dependencies
 
-## 💻 Local development
-
-Requirements: Node.js and npm, plus a Gemini API key. Netlify CLI is used to run the frontend and functions together locally.
-
-From the repository root, in PowerShell:
-
-```powershell
+```bash
 cd frontend
 npm install
-$env:GEMINI_API_KEY = "your-key"
+```
+
+### 3. Configure the API key
+
+In PowerShell, set the key for the current terminal session:
+
+```powershell
+$env:GEMINI_API_KEY = "your-gemini-api-key"
+```
+
+Optionally choose a model available to your Google AI Studio project:
+
+```powershell
+$env:GEMINI_MODEL = "gemini-3.5-flash-lite"
+```
+
+Do not commit API keys. If you use a local `.env` file, keep it out of Git and ensure it is loaded by your local tooling.
+
+### 4. Start the application
+
+From the `frontend/` directory:
+
+```bash
 npx netlify dev
 ```
 
-Open the local URL printed by Netlify CLI. Keep your API key in your local shell or a private environment file excluded from Git. A plain Vite preview does not run Netlify Functions.
+Open the local URL printed by Netlify CLI. Running only `npm run dev` starts Vite but does not, by itself, provide the Netlify Functions used by the production app.
 
-## ✅ Release smoke-test checklist
+## Deploy to Netlify
 
-After deployment, verify:
+The root `netlify.toml` contains the deployment configuration. The expected settings are:
 
-- [ ] The homepage loads without a console error.
-- [ ] Generate a new story with each genre at least once.
-- [ ] Short, Medium, and Long options submit successfully.
-- [ ] Continue Story appends new material and preserves continuity.
-- [ ] Copy and Download work.
-- [ ] The pumpkin toggles between light and dark modes.
-- [ ] The selected theme survives a page refresh.
-- [ ] The page scrolls on desktop and mobile.
-- [ ] The health endpoint responds, and a real story-generation request succeeds.
+| Setting | Value |
+|---|---|
+| Base directory | `frontend` |
+| Build command | `npm run build` |
+| Publish directory | `dist` |
+| Functions directory | `netlify/functions` (relative to the base directory) |
 
-## 🔐 Security and limitations
+1. Import `Shivam-Sharma2009/GhostWriterAI` into Netlify.
+2. Confirm the build settings above.
+3. In the Netlify site's environment variables, add `GEMINI_API_KEY` as a secret.
+4. Optionally set `GEMINI_MODEL` to a model enabled for the API key. If omitted, the function uses `gemini-3.5-flash-lite`.
+5. Ensure the variables are available to Functions at runtime.
+6. Trigger a deployment and test the deployed site.
 
-- Keep `GEMINI_API_KEY` in server-side Netlify environment variables only.
-- Never publish the API key in source code, screenshots, browser bundles, or logs.
-- Monitor API usage and configure available key restrictions in Google AI Studio.
-- Gemini API availability, model access, quotas, and terms depend on Google's current policies; free usage is limited and not guaranteed to be unlimited.
-- The public story endpoint validates inputs, but this project does not currently implement a robust persistent rate limiter. Add stronger abuse controls before high-traffic public use.
-- Avoid sending sensitive personal information in story prompts.
-- The background photograph is loaded from an external image host, so its display depends on that host being reachable.
+**Live app:** https://ghostwriterai-hectoberfect.netlify.app/
 
-## 📄 License
+If Netlify pauses production deployments because the team has exhausted its operational credits, the last successful published deployment may remain available, but new GitHub commits will not appear on the live site until deployments resume.
 
-The project source is released under the MIT License. Gemini models and API access are governed by Google's applicable terms.
+## API reference
+
+### `POST /.netlify/functions/story`
+
+Generates a new story or continues an existing one.
+
+**Request body**
+
+```json
+{
+  "prompt": "A student receives a message from a computer that has been unplugged for ten years.",
+  "genre": "Tech Horror",
+  "length": "Short",
+  "previous_story": ""
+}
+```
+
+| Field | Required | Accepted values / limit |
+|---|---|---|
+| `prompt` | Yes | Non-empty string, up to 1,000 characters |
+| `genre` | No | `Supernatural`, `Psychological`, `Cosmic`, `Gothic`, `Tech Horror` |
+| `length` | No | `Short`, `Medium`, `Long` |
+| `previous_story` | No | Existing story text, up to 12,000 characters |
+
+**Success response**
+
+```json
+{
+  "story": "The generated title and story...",
+  "model": "gemini-3.5-flash-lite"
+}
+```
+
+The returned `model` reflects the configured model for that request. Error responses contain an `error` message. The function also handles common missing-key, invalid-input, quota/rate-limit, model-availability, provider, and timeout failures.
+
+### `GET /.netlify/functions/health`
+
+Returns the provider name, configured model, and whether `GEMINI_API_KEY` is present.
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "provider": "Gemini",
+  "model": "gemini-3.5-flash-lite",
+  "note": "This confirms the key is configured; it does not test Gemini API availability or quota."
+}
+```
+
+A successful health response does not guarantee that a story request will succeed. Test the generation endpoint itself.
+
+## Verification checklist
+
+After a local run or deployment, check the following:
+
+- [ ] Homepage loads without a browser console error.
+- [ ] Empty prompts are rejected with a useful message.
+- [ ] All five horror styles can be selected.
+- [ ] Short, Medium, and Long requests are accepted.
+- [ ] A new story is returned and displayed.
+- [ ] Continue Story adds new material without replacing the existing manuscript.
+- [ ] Copy places the story on the clipboard.
+- [ ] Download saves a plain-text story file.
+- [ ] Pumpkin control switches between dark and light themes.
+- [ ] Theme preference persists after refresh when browser storage is available.
+- [ ] Footer clock displays India time and date and updates.
+- [ ] Layout remains usable on narrow screens.
+- [ ] Health endpoint reports configuration and a real story request succeeds.
+
+## Security and limitations
+
+- Keep `GEMINI_API_KEY` in server-side environment variables only. Never put it in frontend source, a `VITE_*` variable, screenshots, or committed files.
+- The server validates prompt length, genre, story length, and previous-story size before calling the provider.
+- The public story endpoint does not currently implement a robust persistent rate limiter. Add stronger abuse controls before exposing the service to high-volume traffic.
+- API availability, model access, quotas, and pricing are controlled by Google and can change. Free usage is limited and is not guaranteed to be unlimited.
+- Generated text can be inconsistent or contain mistakes. Review and edit output before publishing.
+- Avoid entering confidential or sensitive personal information into prompts.
+- The background photograph is loaded from an external image host and may not display if that host is unavailable.
+- The live app depends on Netlify Functions and the Gemini API; a static frontend preview alone cannot provide story generation.
+
+## Roadmap
+
+Potential next improvements:
+
+- [ ] Optional saved-story library with user-controlled storage
+- [ ] More genre and tone controls
+- [ ] Export formats beyond plain text
+- [ ] Stronger request throttling and abuse protection
+- [ ] Automated tests for serverless function validation and error handling
+- [ ] Accessibility review and additional keyboard-navigation checks
+
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+The Gemini API and model are provided by Google and remain subject to Google's applicable terms, availability, and usage policies.
