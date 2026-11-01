@@ -257,3 +257,33 @@ footer { display: flex; justify-content: space-between; gap: 12px; color: #98a99
 @media (max-width: 420px) {
   .pumpkin-toggle { width: 38px; height: 38px; flex-basis: 38px; }
 }
+
+
+/* Live India clock in the footer */
+.footer-clock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  color: #c2d2c5;
+  font: 10px 'DM Mono', monospace;
+  letter-spacing: .35px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.clock-indicator {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 9px rgba(139, 227, 173, .8);
+}
+.footer-clock time { color: var(--green); }
+.clock-date { color: #91a397; }
+:root[data-theme="light"] .footer-clock { color: #385b42; }
+:root[data-theme="light"] .footer-clock time { color: #237b49; }
+:root[data-theme="light"] .clock-date { color: #607965; }
+@media (max-width: 520px) {
+  .footer-clock { width: 100%; justify-content: flex-start; }
+}
