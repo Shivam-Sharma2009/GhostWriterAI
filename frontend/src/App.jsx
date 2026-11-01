@@ -32,6 +32,28 @@ export default function App() {
     }
   }, [theme])
 
+  const [currentTime, setCurrentTime] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  const footerTime = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  }).format(currentTime)
+
+  const footerDate = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(currentTime)
+
   async function generate(continueStory = false) {
     if (!prompt.trim()) {
       setError('Give your nightmare a starting point first.')
@@ -192,6 +214,11 @@ export default function App() {
       <footer>
         <span>GHOSTWRITER.AI</span>
         <span className="footer-center">MADE IN THE DARK <span>✳</span></span>
+        <span className="footer-clock" aria-label={`India time ${footerTime}, ${footerDate}`}>
+          <span className="clock-indicator" aria-hidden="true" />
+          <time>{footerTime}</time>
+          <span className="clock-date">{footerDate} · IST</span>
+        </span>
       </footer>
     </main>
   )
