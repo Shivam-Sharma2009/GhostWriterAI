@@ -1,7 +1,7 @@
 # 👻 GhostWriter AI
 
 > **Stories from the other side.**  
-> Turn one unsettling idea into an atmospheric horror story.
+> Turn one unsettling idea into an atmospheric horror story, in **English or Hindi**.
 
 <p align="center">
   <a href="https://ghostwriterai-hectoberfect.netlify.app/">
@@ -36,6 +36,8 @@ The interface pairs a haunted-library atmosphere with a responsive writing works
 
 ## Features
 
+- **Bilingual storytelling:** generate stories in English or Hindi (Devanagari script), with a language selector in the header.
+
 ### AI storytelling
 - **Prompt-led generation:** start with a premise, character, location, message, or strange event.
 - **Five horror styles:** Supernatural, Psychological, Cosmic, Gothic, and Tech Horror.
@@ -59,12 +61,13 @@ The interface pairs a haunted-library atmosphere with a responsive writing works
 
 ## Screens and experience
 
-1. Open the app and enter a story seed in **Story Seed**.
-2. Select one of the five horror styles.
-3. Choose Short, Medium, or Long.
-4. Select **Generate Story** and read the manuscript.
-5. Use **Continue the Story** to request additional material.
-6. Copy or download the finished story.
+1. Open the app and choose **EN** or **हिन्दी** in the header.
+2. Enter a story seed in **Story Seed**.
+3. Select one of the five horror styles.
+4. Choose Short, Medium, or Long.
+5. Select **Generate Story** and read the manuscript.
+6. Use **Continue the Story** to request additional material in the selected language.
+7. Copy or download the finished story.
 
 The app is a creative writing tool. Generated stories are fictional and should be reviewed and edited by the user.
 
@@ -100,7 +103,7 @@ The production application uses a React/Vite frontend and Netlify Functions as a
 └───────────────────────────────┘
 ```
 
-The browser sends the prompt, genre, length, and optional previous story to the `story` function. The function validates the request, constructs genre-specific instructions, calls Gemini, and returns the generated text as JSON.
+The browser sends the prompt, genre, length, selected language (`en` or `hi`), and optional previous story to the `story` function. Hindi output is requested in Devanagari script. The function validates the request, constructs genre-specific instructions, calls Gemini, and returns the generated text as JSON.
 
 The `health` function reports whether the server-side API key is configured. It is a configuration check, not a live model or quota test.
 
@@ -117,6 +120,7 @@ The `health` function reports whether the server-side API key is configured. It 
 | Icons | Lucide React |
 | Serverless API | Netlify Functions |
 | AI provider | Google Gemini Developer API |
+| Story languages | English and Hindi (Devanagari) |
 | Default model | `gemini-3.5-flash-lite` (overridable with `GEMINI_MODEL`) |
 | Hosting | Netlify |
 | Version control | Git and GitHub |
@@ -229,6 +233,7 @@ Generates a new story or continues an existing one.
   "prompt": "A student receives a message from a computer that has been unplugged for ten years.",
   "genre": "Tech Horror",
   "length": "Short",
+  "language": "hi",
   "previous_story": ""
 }
 ```
@@ -239,6 +244,7 @@ Generates a new story or continues an existing one.
 | `genre` | No | `Supernatural`, `Psychological`, `Cosmic`, `Gothic`, `Tech Horror` |
 | `length` | No | `Short`, `Medium`, `Long` |
 | `previous_story` | No | Existing story text, up to 12,000 characters |
+| `language` | No | `en` or `hi`; defaults to `en` |
 
 **Success response**
 
