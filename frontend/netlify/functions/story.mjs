@@ -1,4 +1,6 @@
 const GENRES = new Set(["Supernatural", "Psychological", "Cosmic", "Gothic", "Tech Horror"]);
+const LANGUAGES = new Set(["en", "hi"]);
+const LANGUAGE_GUIDANCE = { en: "Write the complete story in natural, fluent English.", hi: "Write the complete story in natural Hindi using Devanagari script. Do not write Hindi in Roman letters. Translate all narration and dialogue into Hindi." };
 const LENGTHS = {
   Short: ["about 200 words", 450],
   Medium: ["about 500 words", 900],
@@ -49,18 +51,21 @@ export default async (request) => {
   const genre = String(data.genre || "Supernatural").trim();
   const length = String(data.length || "Short").trim();
   const previousStory = String(data.previous_story || "").trim();
+  const language = String(data.language || "en").trim().toLowerCase();
 
   if (!prompt) return json({ error: "Enter a story idea first." }, 400);
   if (prompt.length > 1000) return json({ error: "Keep your prompt under 1,000 characters." }, 400);
   if (!GENRES.has(genre)) return json({ error: "Choose a valid horror style." }, 400);
   if (!Object.hasOwn(LENGTHS, length)) return json({ error: "Choose a valid story length." }, 400);
+  if (!LANGUAGES.has(language)) return json({ error: "Choose English or Hindi." }, 400);
   if (previousStory.length > 12000) return json({ error: "The existing story is too long to continue." }, 400);
 
   const [lengthDescription, maxTokens] = LENGTHS[length];
   const genreGuidance = GENRE_GUIDANCE[genre];
+  const languageGuidance = LANGUAGE_GUIDANCE[language];
   const userMessage = previousStory
     ? `Continue this ${genre} horror story with ${lengthDescription} of NEW material. Preserve continuity, follow the genre guidance, escalate the horror, and do not repeat the existing text.\n\nGenre guidance: ${genreGuidance}\n\nOriginal idea: ${prompt}\n\nExisting story:\n${previousStory}`
-    : `Write a ${genre} horror story of ${lengthDescription}.\nGenre guidance: ${genreGuidance}\nStory idea (use this as the central premise): ${prompt}`;
+    : `Write a ${genre} horror story of ${lengthDescription}.\nGenre guidance: ${genreGuidance}\nStory idea (use this as the central premise): ${prompt}. ${languageGuidance}`;
 
   const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
@@ -73,7 +78,7 @@ export default async (request) => {
         "x-goog-api-key": apiKey
       },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        systemInstruction: { parts: [{ text: `${SYSTEM_PROMPT} ${languageGuidance}` }] },
         contents: [{ role: "user", parts: [{ text: userMessage }] }],
         generationConfig: { temperature: 0.9, maxOutputTokens: maxTokens }
       }),
@@ -119,7 +124,7 @@ export default async (request) => {
           : "The AI returned an empty story. Try a different prompt."
       }, 502);
     }
-    return json({ story, model });
+    return json({ story, model, language });
   } catch (error) {
     console.error("Gemini request failed:", error?.name || "UnknownError");
     return json({
