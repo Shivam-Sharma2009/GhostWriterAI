@@ -287,3 +287,41 @@ footer { display: flex; justify-content: space-between; gap: 12px; color: #98a99
 @media (max-width: 520px) {
   .footer-clock { width: 100%; justify-content: flex-start; }
 }
+
+
+/* English / Hindi language selector */
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(139, 227, 173, .3);
+  border-radius: 999px;
+  background: rgba(8, 13, 10, .78);
+  flex: 0 0 auto;
+}
+.language-switch button {
+  min-width: 42px;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #a9b9ad;
+  font: 11px 'DM Mono', monospace;
+  transition: background .2s ease, color .2s ease;
+}
+.language-switch button.active {
+  color: #07120b;
+  background: var(--green);
+  font-weight: 600;
+}
+.language-switch button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+:root[data-theme="light"] .language-switch { background: rgba(255,255,255,.86); border-color: #bfd3c4; }
+:root[data-theme="light"] .language-switch button { color: #506756; }
+:root[data-theme="light"] .language-switch button.active { color: #fff; background: #287c49; }
+@media (max-width: 420px) {
+  .topbar-left { gap: 7px; }
+  .brand { gap: 6px; font-size: 9px; letter-spacing: .4px; }
+  .language-switch { padding: 3px; }
+  .language-switch button { min-width: 35px; padding: 7px 8px; font-size: 10px; }
+}
