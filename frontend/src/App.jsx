@@ -15,6 +15,28 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [language, setLanguage] = useState(() => {
+    try { return localStorage.getItem('ghostwriter-language') === 'hi' ? 'hi' : 'en' } catch { return 'en' }
+  })
+  const labels = language === 'hi' ? {
+    tagline: 'आपकी कल्पना। आपका डरावना सपना।', manuscript: 'आपकी कहानी', create: 'अपना डरावना सपना बनाएँ',
+    seed: 'कहानी का विचार', placeholder: 'एक छात्र को ऐसे कंप्यूटर से संदेश मिलता है जो सालों से बंद पड़ा है...',
+    genre: 'डर की शैली', length: 'कहानी की लंबाई', generate: 'कहानी बनाएँ', generating: 'कहानी लिखी जा रही है…',
+    continuing: 'आगे लिखा जा रहा है…', continue: 'कहानी आगे बढ़ाएँ', empty: 'पहले अपनी कहानी का विचार लिखें।',
+    copied: 'कहानी कॉपी हो गई।', downloaded: 'कहानी डाउनलोड शुरू हो गई।',
+    options: ['अलौकिक', 'मनोवैज्ञानिक', 'कॉस्मिक', 'गॉथिक', 'टेक हॉरर'], lengths: ['छोटी', 'मध्यम', 'लंबी']
+  } : {
+    tagline: '{labels.tagline}', manuscript: 'THE MANUSCRIPT', create: 'CREATE YOUR NIGHTMARE',
+    seed: 'STORY SEED', placeholder: 'A student receives a message from a computer that has been unplugged for years...',
+    genre: 'HORROR STYLE', length: 'STORY LENGTH', generate: 'GENERATE STORY', generating: 'WRITING YOUR NIGHTMARE…',
+    continuing: 'CONTINUING…', continue: 'CONTINUE THE STORY', empty: 'Give your nightmare a starting point first.',
+    copied: 'Story copied to clipboard.', downloaded: 'Story download started.',
+    options: ['Supernatural', 'Psychological', 'Cosmic', 'Gothic', 'Tech Horror'], lengths: ['Short', 'Medium', 'Long']
+  }
+  useEffect(() => {
+    document.documentElement.lang = language
+    try { localStorage.setItem('ghostwriter-language', language) } catch {}
+  }, [language])
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('ghostwriter-theme') === 'light' ? 'light' : 'dark'
@@ -56,7 +78,7 @@ export default function App() {
 
   async function generate(continueStory = false) {
     if (!prompt.trim()) {
-      setError('Give your nightmare a starting point first.')
+      setError(labels.empty)
       return
     }
     setLoading(true)
@@ -67,7 +89,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: prompt.trim(), genre, length,
+          prompt: prompt.trim(), genre, length, language,
           previous_story: continueStory ? story : '',
         }),
       })
@@ -92,7 +114,7 @@ export default function App() {
   async function copyStory() {
     try {
       await navigator.clipboard.writeText(story)
-      setNotice('Story copied to clipboard.')
+      setNotice(labels.copied)
     } catch {
       setError('Clipboard access failed. Select and copy the story manually.')
     }
@@ -105,7 +127,7 @@ export default function App() {
     link.download = 'ghostwriter-story.txt'
     link.click()
     window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
-    setNotice('Story download started.')
+    setNotice(labels.downloaded)
   }
 
   return (
@@ -127,6 +149,7 @@ export default function App() {
             <span>GHOSTWRITER<span className="accent">.AI</span></span>
           </a>
         </div>
+        <div className="language-switch" role="group" aria-label="Choose language"><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button><button type="button" className={language === 'hi' ? 'active' : ''} aria-pressed={language === 'hi'} onClick={() => setLanguage('hi')}>हिन्दी</button></div>
       </header>
 
       <section className="hero">
@@ -142,7 +165,7 @@ export default function App() {
       <section className="workspace">
         <div className="panel manuscript">
           <div className="manuscript-header">
-            <div className="section-title"><BookOpen size={16} /><span>THE MANUSCRIPT</span></div>
+            <div className="section-title"><BookOpen size={16} /><span>{labels.manuscript}</span></div>
             {story && <div className="story-actions">
               <button title="Copy story" aria-label="Copy story" onClick={copyStory}><Copy size={16} /></button>
               <button title="Download story" aria-label="Download story" onClick={downloadStory}><Download size={16} /></button>
@@ -159,7 +182,7 @@ export default function App() {
               <article className="story-text" aria-live="polite">{story}</article>
               <button className="continue-button" onClick={() => generate(true)} disabled={loading}>
                 {loading ? <RefreshCw size={15} className="spin" /> : <Sparkles size={15} />}
-                {loading ? 'CONTINUING…' : 'CONTINUE THE STORY'}
+                {loading ? labels.continuing : labels.continue}
               </button>
             </div>
           ) : (
@@ -174,34 +197,34 @@ export default function App() {
         </div>
 
         <div className="panel controls">
-          <div className="section-title"><WandSparkles size={16} /><span>CREATE YOUR NIGHTMARE</span></div>
-          <label htmlFor="prompt">STORY SEED <span className="optional">({prompt.length}/1000)</span></label>
+          <div className="section-title"><WandSparkles size={16} /><span>{labels.create}</span></div>
+          <label htmlFor="prompt">{labels.seed} <span className="optional">({prompt.length}/1000)</span></label>
           <textarea
             id="prompt" value={prompt} maxLength={1000}
             onChange={event => setPrompt(event.target.value)}
-            placeholder="A student receives a message from a computer that has been unplugged for years..."
+            placeholder={labels.placeholder}
           />
           <div className="field-row">
             <div className="field">
-              <label htmlFor="genre">HORROR STYLE</label>
+              <label htmlFor="genre">{labels.genre}</label>
               <select id="genre" value={genre} onChange={event => setGenre(event.target.value)}>
                 {['Supernatural', 'Psychological', 'Cosmic', 'Gothic', 'Tech Horror'].map(item =>
-                  <option key={item} value={item}>{item}</option>
+                  <option key={item} value={item}>{labels.options[['Supernatural','Psychological','Cosmic','Gothic','Tech Horror'].indexOf(item)]}</option>
                 )}
               </select>
             </div>
             <div className="field">
-              <label htmlFor="length">STORY LENGTH</label>
+              <label htmlFor="length">{labels.length}</label>
               <select id="length" value={length} onChange={event => setLength(event.target.value)}>
                 {['Short', 'Medium', 'Long'].map(item =>
-                  <option key={item} value={item}>{item}</option>
+                  <option key={item} value={item}>{labels.lengths[['Short','Medium','Long'].indexOf(item)]}</option>
                 )}
               </select>
             </div>
           </div>
           <button className="generate-button" onClick={() => generate()} disabled={loading}>
             {loading ? <RefreshCw size={17} className="spin" /> : <Sparkles size={17} />}
-            {loading ? 'WRITING YOUR NIGHTMARE…' : 'GENERATE STORY'}
+            {loading ? labels.generating : labels.generate}
           </button>
           <div className="engine-note"><span className="engine-icon"><CircleAlert size={14} /></span>
             Powered by hosted AI. Provider limits may apply.
