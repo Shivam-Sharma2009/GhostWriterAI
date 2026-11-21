@@ -39,6 +39,9 @@ export default function App() {
     document.documentElement.lang = language
     try { localStorage.setItem('ghostwriter-language', language) } catch {}
   }, [language])
+  useEffect(() => {
+    try { localStorage.setItem('ghostwriter-library', JSON.stringify(savedStories)) } catch {}
+  }, [savedStories])
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('ghostwriter-theme') === 'light' ? 'light' : 'dark'
