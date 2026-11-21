@@ -48,6 +48,7 @@ The interface pairs a haunted-library atmosphere with a responsive writing works
 ### Writing tools
 - **Copy:** copy the generated manuscript to the clipboard.
 - **Download:** save the story as a `.txt` file.
+- **Story Library:** save, reopen, and delete generated stories locally in your browser. No account or database is required.
 - **Prompt counter:** see the character count while writing a story seed.
 - **Feedback states:** clear loading, success, and error messages.
 
@@ -288,6 +289,7 @@ After a local run or deployment, check the following:
 - [ ] Download saves a plain-text story file.
 - [ ] Pumpkin control switches between dark and light themes.
 - [ ] Theme preference persists after refresh when browser storage is available.
+- [ ] Save a story to the local library, reload, reopen it, and delete it.
 - [ ] Footer clock displays India time and date and updates.
 - [ ] Layout remains usable on narrow screens.
 - [ ] Health endpoint reports configuration and a real story request succeeds.
@@ -307,7 +309,7 @@ After a local run or deployment, check the following:
 
 Potential next improvements:
 
-- [ ] Optional saved-story library with user-controlled storage
+- [x] Local saved-story library with user-controlled storage
 - [ ] More genre and tone controls
 - [ ] Export formats beyond plain text
 - [ ] Stronger request throttling and abuse protection
