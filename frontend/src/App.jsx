@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Ghost, Sparkles, Copy, Download, RefreshCw, ShieldCheck,
-  CircleAlert, BookOpen, WandSparkles
+  CircleAlert, BookOpen, WandSparkles, Bookmark, Library, Trash2
 } from 'lucide-react'
 import './App.css'
 
@@ -15,6 +15,8 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [libraryOpen, setLibraryOpen] = useState(false)
+  const [savedStories, setSavedStories] = useState(() => { try { const v = JSON.parse(localStorage.getItem('ghostwriter-library') || '[]'); return Array.isArray(v) ? v : [] } catch { return [] } })
   const [language, setLanguage] = useState(() => {
     try { return localStorage.getItem('ghostwriter-language') === 'hi' ? 'hi' : 'en' } catch { return 'en' }
   })
@@ -111,6 +113,15 @@ export default function App() {
     }
   }
 
+  function saveStory() {
+    if (!story.trim()) return
+    const entry = { id: Date.now(), title: story.split(/\n/)[0].replace(/^#+\s*/, '').slice(0, 80) || prompt.slice(0, 80) || 'Untitled story', story, prompt, genre, length, language, savedAt: new Date().toISOString() }
+    setSavedStories(current => [entry, ...current])
+    setNotice(language === 'hi' ? 'कहानी आपकी लाइब्रेरी में सेव हो गई।' : 'Story saved to your library.')
+  }
+  function loadStory(entry) { setStory(entry.story); setPrompt(entry.prompt || ''); setGenre(entry.genre || 'Supernatural'); setLength(entry.length || 'Short'); setLanguage(entry.language || 'en'); setLibraryOpen(false); setError(''); setNotice(language === 'hi' ? 'सेव की गई कहानी खोली गई।' : 'Saved story opened.') }
+  function deleteStory(id) { setSavedStories(current => current.filter(entry => entry.id !== id)) }
+
   async function copyStory() {
     try {
       await navigator.clipboard.writeText(story)
@@ -149,8 +160,13 @@ export default function App() {
             <span>GHOSTWRITER<span className="accent">.AI</span></span>
           </a>
         </div>
+<button className="library-toggle" type="button" onClick={() => setLibraryOpen(v => !v)}><Library size={15} /> {language === 'hi' ? 'लाइब्रेरी' : 'Library'} <span>{savedStories.length}</span></button>
         <div className="language-switch" role="group" aria-label="Choose language"><button type="button" className={language === 'en' ? 'active' : ''} aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button><button type="button" className={language === 'hi' ? 'active' : ''} aria-pressed={language === 'hi'} onClick={() => setLanguage('hi')}>हिन्दी</button></div>
       </header>
+      {libraryOpen && <section className="library-panel panel">
+        <div className="library-heading"><div className="section-title"><Library size={16}/><span>{language === 'hi' ? 'आपकी कहानी लाइब्रेरी' : 'YOUR STORY LIBRARY'}</span></div><button className="library-close" onClick={() => setLibraryOpen(false)}>{language === 'hi' ? 'बंद करें' : 'Close'}</button></div>
+        {savedStories.length === 0 ? <div className="library-empty">{language === 'hi' ? 'अभी कोई कहानी सेव नहीं है। कहानी लिखें और Save Story दबाएँ।' : 'No saved stories yet. Generate a story and click Save Story.'}</div> : <div className="library-list">{savedStories.map(entry => <article className="library-item" key={entry.id}><div className="library-item-main"><button className="library-story-title" onClick={() => loadStory(entry)}>{entry.title || (language === 'hi' ? 'शीर्षक रहित कहानी' : 'Untitled story')}</button><div className="library-meta">{entry.genre} · {entry.length} · {entry.language === 'hi' ? 'हिन्दी' : 'EN'} · {new Date(entry.savedAt).toLocaleDateString()}</div><p>{entry.prompt}</p></div><div className="library-item-actions"><button onClick={() => loadStory(entry)} title={language === 'hi' ? 'खोलें' : 'Open'}><BookOpen size={15}/></button><button className="delete-story" onClick={() => deleteStory(entry.id)} title={language === 'hi' ? 'हटाएँ' : 'Delete'}><Trash2 size={15}/></button></div></article>)}</div>}
+      </section>}
 
       <section className="hero">
         <div className="eyebrow"><span /> YOUR IMAGINATION. YOUR NIGHTMARE.</div>
@@ -166,7 +182,7 @@ export default function App() {
         <div className="panel manuscript">
           <div className="manuscript-header">
             <div className="section-title"><BookOpen size={16} /><span>{labels.manuscript}</span></div>
-            {story && <div className="story-actions">
+            {story && <div className="story-actions"><button title="Save story" aria-label="Save story" onClick={saveStory}><Bookmark size={16}/></button>
               <button title="Copy story" aria-label="Copy story" onClick={copyStory}><Copy size={16} /></button>
               <button title="Download story" aria-label="Download story" onClick={downloadStory}><Download size={16} /></button>
             </div>}
