@@ -48,7 +48,8 @@ The interface pairs a haunted-library atmosphere with a responsive writing works
 ### Writing tools
 - **Copy:** copy the generated manuscript to the clipboard.
 - **Download:** save the story as a `.txt` file.
-- **Story Library:** save, reopen, and delete generated stories locally in your browser. No account or database is required.
+- **Story Library:** save generated manuscripts, reopen them later, and delete saved entries from your library. Stories are stored locally in your browser, with no account or database required.
+- **Library metadata:** saved entries retain the story seed, genre, length, language, and save date, so reopening restores the writing setup.
 - **Prompt counter:** see the character count while writing a story seed.
 - **Feedback states:** clear loading, success, and error messages.
 
@@ -68,7 +69,8 @@ The interface pairs a haunted-library atmosphere with a responsive writing works
 4. Choose Short, Medium, or Long.
 5. Select **Generate Story** and read the manuscript.
 6. Use **Continue the Story** to request additional material in the selected language.
-7. Copy or download the finished story.
+7. Save the story to your browser library using the bookmark button, or copy/download it.
+8. Open **Library** from the header to revisit or delete saved stories.
 
 The app is a creative writing tool. Generated stories are fictional and should be reviewed and edited by the user.
 
@@ -104,7 +106,7 @@ The production application uses a React/Vite frontend and Netlify Functions as a
 └───────────────────────────────┘
 ```
 
-The browser sends the prompt, genre, length, selected language (`en` or `hi`), and optional previous story to the `story` function. Hindi output is requested in Devanagari script. The function validates the request, constructs genre-specific instructions, calls Gemini, and returns the generated text as JSON.
+The browser sends the prompt, genre, length, selected language (`en` or `hi`), and optional previous story to the `story` function. Hindi output is requested in Devanagari script. The function validates the request, constructs genre-specific instructions, calls Gemini, and returns the generated text as JSON. The Story Library is separate from the backend: saved manuscripts and their metadata are stored in browser `localStorage` and never uploaded to a database by the library feature.
 
 The `health` function reports whether the server-side API key is configured. It is a configuration check, not a live model or quota test.
 
@@ -289,13 +291,15 @@ After a local run or deployment, check the following:
 - [ ] Download saves a plain-text story file.
 - [ ] Pumpkin control switches between dark and light themes.
 - [ ] Theme preference persists after refresh when browser storage is available.
-- [ ] Save a story to the local library, reload, reopen it, and delete it.
+- [ ] Save a story to the local library, reload the browser, reopen it, and delete it.
+- [ ] Check that the library count updates and saved metadata displays correctly.
 - [ ] Footer clock displays India time and date and updates.
 - [ ] Layout remains usable on narrow screens.
 - [ ] Health endpoint reports configuration and a real story request succeeds.
 
 ## Security and limitations
 
+- The local Story Library uses browser storage. Clearing site data or switching browsers/devices can remove or make saved stories unavailable; there is currently no cloud sync or backup.
 - Keep `GEMINI_API_KEY` in server-side environment variables only. Never put it in frontend source, a `VITE_*` variable, screenshots, or committed files.
 - The server validates prompt length, genre, story length, and previous-story size before calling the provider.
 - The public story endpoint does not currently implement a robust persistent rate limiter. Add stronger abuse controls before exposing the service to high-volume traffic.
@@ -309,7 +313,8 @@ After a local run or deployment, check the following:
 
 Potential next improvements:
 
-- [x] Local saved-story library with user-controlled storage
+- [x] Save, reopen, and delete stories in the local Story Library
+- [ ] Search, filter, and rename saved stories
 - [ ] More genre and tone controls
 - [ ] Export formats beyond plain text
 - [ ] Stronger request throttling and abuse protection
