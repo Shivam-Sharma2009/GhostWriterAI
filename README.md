@@ -309,6 +309,10 @@ After a local run or deployment, check the following:
 - The background photograph is loaded from an external image host and may not display if that host is unavailable.
 - The live app depends on Netlify Functions and the Gemini API; a static frontend preview alone cannot provide story generation.
 
+## Recognition
+
+- **Hacktoberfest Hack Day Noida 2026** — *GhostWrite AI* was among the teams selected for rewards, receiving stickers and a T-shirt.
+
 ## Roadmap
 
 Potential next improvements:
